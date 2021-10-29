@@ -1,6 +1,8 @@
 const { Router } = require("express");
 const { Type } = require("../db");
 const router = Router();
+const { apiUrl } = require("../apiUrl");
+
 
 router.get("/", async (req, res, next) => {
   const allTypes = await Type.findAll();

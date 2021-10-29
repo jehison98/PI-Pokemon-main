@@ -5,8 +5,8 @@ const { Pokemon } = require("../db");
 const { getPkmData } = require("../helpers/getPkmData");
 const { getPkmnByName } = require("../helpers/getPokemons");
 const { allPkms } = require("../helpers/allPkms");
+const { apiUrl } = require("../apiUrl");
 
-const apiUrl = "https://pokeapi.co/api/v2/pokemon";
 router.get("/", async (req, res, next) => {
   let { offset, name } = req.query;
   const limit = 10;
@@ -49,18 +49,31 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  const { name, life, strength, defense, velocity, height, weight } = req.body;
+  let { name, life, strength, defense, velocity, height, weight } = req.body;
+  name = name.toLowerCase();
+  let pkmnExist = false;
   try {
-    const newPokemon = await Pokemon.create({
-      name,
-      life,
-      strength,
-      defense,
-      velocity,
-      height,
-      weight,
-    });
-    res.status(201).send(newPokemon);
+    const pokemon = await axios.get(`${apiUrl}/${name}`);
+    if (pokemon) pkmnExist = true;
+  } catch (err) {
+    pkmnExist = false;
+  }
+
+  try {
+    if (!pkmnExist) {
+      const newPokemon = await Pokemon.create({
+        name,
+        life,
+        strength,
+        defense,
+        velocity,
+        height,
+        weight,
+      });
+      res.status(201).send(newPokemon);
+    } else {
+      res.send("That pokemon alredy exists");
+    }
   } catch (err) {
     next(err); //if error exists go to the next middleware (Error catching endware)
   }

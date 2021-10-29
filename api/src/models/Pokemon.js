@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const axios = require("axios");
+const { apiUrl } = require("../apiUrl");
 
 // Exportamos una funcion que define el modelo
 // Luego le injectamos la conexion a sequelize.
@@ -48,9 +49,7 @@ module.exports = (sequelize) => {
     {
       hooks: {
         beforeCreate: async function (user) {
-          const pkmsApiCount = await axios.get(
-            "https://pokeapi.co/api/v2/pokemon"
-          );
+          const pkmsApiCount = await axios.get(apiUrl);
           user.id = pkmsApiCount.data.count + pkmCount;
           user.name = user.name.toLowerCase();
           pkmCount++;
