@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { Pokemon } = require("../db");
+const { Pokemon, Type } = require("../db");
 const { getPkmData } = require("./getPkmData");
 
 async function getPkmnByName(name, apiUrl) {
@@ -8,6 +8,7 @@ async function getPkmnByName(name, apiUrl) {
     where: {
       name,
     },
+    include: Type,
   });
   if (pokemon) return pokemon;
   else {

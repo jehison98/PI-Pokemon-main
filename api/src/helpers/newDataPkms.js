@@ -1,8 +1,10 @@
-const axios = require("axios");
+const { default: axios } = require("axios");
 
-async function newDataPkms(api) {
-  let pokemonsApi = api.data.results.map(async (pokemon) => {
-    let pkmInfo = await axios.get(pokemon.url);
+async function newDataPkms(api, atribute) {
+  let pokemonsApi = api.map(async (pkmn) => {
+    let pkmInfo;
+    if (atribute) pkmInfo = await axios.get(pkmn[atribute].url);
+    else pkmInfo = await axios.get(pkmn.url);
 
     return {
       id: pkmInfo.data.id,
@@ -19,8 +21,6 @@ async function newDataPkms(api) {
 
   return await Promise.all(pokemonsApi);
 }
-
-
 
 module.exports = {
   newDataPkms,

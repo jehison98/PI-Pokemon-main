@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const axios = require("axios");
 const router = Router();
-const { Pokemon } = require("../db");
+const { Pokemon, Type } = require("../db");
 const { getPkmData } = require("../helpers/getPkmData");
 const { getPkmnByName } = require("../helpers/getPokemons");
 const { allPkms } = require("../helpers/allPkms");
@@ -14,14 +14,19 @@ router.get("/", async (req, res, next) => {
 
   try {
     if (name) {
-      res.send(await getPkmnByName(name, apiUrl));
+      res.json(await getPkmnByName(name, apiUrl));
     } else {
       if (offset) {
         pkmUrl = `${apiUrl}?limit=${limit}&offset=${offset}`;
       }
       const pokemonAPI = await axios.get(pkmUrl);
-      const allPokemons = await allPkms(pokemonAPI, limit, parseInt(offset));
-      res.send(allPokemons);
+      const allPokemons = await allPkms(
+        pokemonAPI.data.results,
+        limit,
+        parseInt(offset),
+        pokemonAPI.data.count
+      );
+      res.json(allPokemons);
     }
   } catch (err) {
     next(err);
@@ -35,12 +40,17 @@ router.get("/:id", async (req, res, next) => {
   id = parseInt(id);
   try {
     if (id > count) {
-      const pokemon = await Pokemon.findByPk(id);
-      if (pokemon) res.send(pokemon);
+      const pokemon = await Pokemon.findOne({
+        where: {
+          id,
+        },
+        include: Type,
+      });
+      if (pokemon) res.json(pokemon);
       else res.sendStatus(404);
     } else {
       const pokemon = await axios.get(`${apiUrl}/${id}`);
-      if (getPkmData(pokemon.data)) res.send(getPkmData(pokemon.data));
+      if (getPkmData(pokemon.data)) res.json(getPkmData(pokemon.data));
       else res.sendStatus(404);
     }
   } catch (err) {
@@ -61,18 +71,26 @@ router.post("/", async (req, res, next) => {
 
   try {
     if (!pkmnExist) {
-      const newPokemon = await Pokemon.create({
-        name,
-        life,
-        strength,
-        defense,
-        velocity,
-        height,
-        weight,
+      console.log(Pokemon);
+      const [newPokemon, created] = await Pokemon.findOrCreate({
+        where: { name },
+        defaults: {
+          name,
+          life,
+          strength,
+          defense,
+          velocity,
+          height,
+          weight,
+        },
       });
-      res.status(201).send(newPokemon);
+      if (created) {
+        res.send(newPokemon);
+      } else {
+        res.send("Pokemon already exists");
+      }
     } else {
-      res.send("That pokemon alredy exists");
+      res.send("Pokemon alredy exists");
     }
   } catch (err) {
     next(err); //if error exists go to the next middleware (Error catching endware)
@@ -84,7 +102,7 @@ router.post("/:pokemonId/type/:typeId", async (req, res, next) => {
     const { pokemonId, typeId } = req.params;
     const pokemon = await Pokemon.findByPk(pokemonId);
     await pokemon.addType(typeId);
-    res.sendStatus(200);
+    res.json(pokemon);
   } catch (err) {
     next(err);
   }
