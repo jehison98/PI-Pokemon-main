@@ -1,8 +1,9 @@
 const { default: axios } = require("axios");
 const { Router } = require("express");
-const { Type, Pokemon } = require("../db");
+const { Type } = require("../db");
 const router = Router();
 const { newDataPkms } = require("../helpers/newDataPkms");
+const { typesDbPokemons } = require("../helpers/typesDbPkms");
 const apiUrl = "https://pokeapi.co/api/v2/type";
 
 router.get("/", async (req, res, next) => {
@@ -18,7 +19,7 @@ router.get("/:id", async (req, res, next) => {
   let { id } = req.params;
   id = parseInt(id);
   try {
-    const typeDB = await Type.findByPk(parseInt(id));
+    const typeDB = await Type.findByPk(id);
     if (typeDB) {
       const typesPkms = await axios.get(apiUrl);
       const specificType = typesPkms.data.results.find(
@@ -26,15 +27,8 @@ router.get("/:id", async (req, res, next) => {
       );
       const typeInfo = await axios.get(specificType.url);
       const typePkmns = await newDataPkms(typeInfo.data.pokemon, "pokemon");
-      const allData = await Pokemon.findAll({
-        include: [
-          {
-            model: Type,
-            where: { id },
-          },
-        ],
-      });
-      const specificTypePkms = [...typePkmns, ...allData];
+      const pkmsByType = await typesDbPokemons(id);
+      const specificTypePkms = [...typePkmns, ...pkmsByType];
       res.json(specificTypePkms);
     } else {
       res.sendStatus(404);
