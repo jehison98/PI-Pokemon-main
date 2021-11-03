@@ -1,0 +1,8 @@
+#search-pokemon {
+  padding: 0px 15px;
+}
+
+#search-pokemon-form .btn {
+  border: none;
+  outline: none;
+}

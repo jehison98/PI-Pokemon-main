@@ -5,11 +5,12 @@ const { Pokemon, Type } = require("../db");
 const { getPkmData } = require("../helpers/getPkmData");
 const { getPkmnByName } = require("../helpers/getPokemons");
 const { allPkms } = require("../helpers/allPkms");
+const { countPokemons } = require("../helpers/countPokemons");
 const { apiUrl } = require("../apiUrl");
 
 router.get("/", async (req, res, next) => {
   let { offset, name } = req.query;
-  const limit = 10;
+  const limit = 20;
   let pkmUrl = `${apiUrl}?limit=${limit}`;
 
   try {
@@ -33,7 +34,17 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get("/count", async (req, res, next) => {
+  try {
+    const pokemonAPI = await axios.get(apiUrl);
+    res.json(await countPokemons(pokemonAPI.data.count));
+  } catch (err) {
+    console.log("hola");
+    next(err);
+  }
+});
+
+router.get("/pokemon/:id", async (req, res, next) => {
   const pokemonAPI = await axios.get(apiUrl);
   const count = pokemonAPI.data.count;
   let { id } = req.params;

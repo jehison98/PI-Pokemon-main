@@ -16,6 +16,7 @@ async function newDataPkms(api, atribute) {
       height: pkmInfo.data.height,
       weight: pkmInfo.data.weight,
       type: pkmInfo.data.types,
+      sprite: pkmInfo.data.sprites.front_default,
     };
   });
 
