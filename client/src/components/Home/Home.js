@@ -9,7 +9,7 @@ export function Home() {
     <div id="home">
       <div className="home-content">
         <img src={logo} alt="logo" className="slide-down" />
-        <Link to="/search" className="btn fade-in">
+        <Link to="/search" className="btn-home fade-in">
           Click me to start
         </Link>
       </div>

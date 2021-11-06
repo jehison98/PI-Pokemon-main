@@ -1,0 +1,12 @@
+#form-filters h2 {
+  margin-top: 0rem;
+  margin-bottom: 0.2rem;
+}
+
+#form-filters .btn {
+  margin-bottom: 1rem;
+  width: 100%;
+  height: 35.5px;
+  font-size: 1.2rem;
+  font-weight: 500;
+}

@@ -1,3 +1,22 @@
 #search {
   padding: 0px 15px;
+  text-align: center;
+}
+
+#search-content {
+  background-color: #fff;
+  color: #3c3c3c;
+  margin: 2rem 0px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+#search-content .sidebar {
+  margin: 1rem;
+  width: 20%;
+}
+
+#search-content .content {
+  width: 80%;
 }

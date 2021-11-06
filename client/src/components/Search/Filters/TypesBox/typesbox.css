@@ -1,0 +1,13 @@
+#box-types {
+  padding: 1rem 0.1rem;
+  background-color: #313131;
+  border-radius: 5px;
+  color: #fff;
+}
+
+#box-types .types-checkboxes {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+}

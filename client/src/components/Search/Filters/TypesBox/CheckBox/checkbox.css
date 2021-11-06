@@ -1,0 +1,12 @@
+.type-checkbox {
+  width: 50%;
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 400;
+  text-transform: capitalize;
+  margin: 0.5rem 0px;
+}
+
+.type-checkbox input {
+  cursor: pointer;
+}
