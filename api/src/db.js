@@ -9,9 +9,6 @@ const sequelize = new Sequelize(
   {
     logging: false, // set to console.log to see the raw SQL queries
     native: false, // lets Sequelize know we can use pg-native for ~30% more speed
-    define: {
-      timestamps: false,
-    },
   }
 );
 const basename = path.basename(__filename);
@@ -41,11 +38,11 @@ sequelize.models = Object.fromEntries(capsEntries);
 // En sequelize.models están todos los modelos importados como propiedades
 // Para relacionarlos hacemos un destructuring
 const { Pokemon, Type } = sequelize.models;
+Pokemon.belongsToMany(Type, { through: "PokemonsTypes" });
+Type.belongsToMany(Pokemon, { through: "PokemonsTypes" });
 
 // Aca vendrian las relaciones
 // Product.hasMany(Reviews);
-Pokemon.belongsToMany(Type, { through: "PokemonsTypes" });
-Type.belongsToMany(Pokemon, { through: "PokemonsTypes" });
 
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');

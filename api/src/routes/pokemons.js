@@ -1,130 +1,136 @@
 const { Router } = require("express");
-const axios = require("axios");
 const router = Router();
+const { default: axios } = require("axios");
 const { Pokemon, Type } = require("../db");
-const { getPkmData } = require("../helpers/getPkmData");
-const { getPkmnByName } = require("../helpers/getPokemons");
-const { allPkms } = require("../helpers/allPkms");
-const { countPokemons } = require("../helpers/countPokemons");
-const { apiUrl } = require("../apiUrl");
+const {
+  getDataPokemons,
+  getPokemonsType,
+  getTwoTypes,
+  orderPokemons,
+} = require("../helpers/index");
+const apiUrl = require("./apiUrl");
 
 router.get("/", async (req, res, next) => {
-  let { offset, name } = req.query;
-  const limit = 20;
-  let pkmUrl = `${apiUrl}?limit=${limit}`;
-
+  const { offset, name } = req.query;
   try {
     if (name) {
-      res.json(await getPkmnByName(name, apiUrl));
-    } else {
-      if (offset) {
-        pkmUrl = `${apiUrl}?limit=${limit}&offset=${offset}`;
-      }
-      const pokemonAPI = await axios.get(pkmUrl);
-      const allPokemons = await allPkms(
-        pokemonAPI.data.results,
-        limit,
-        parseInt(offset),
-        pokemonAPI.data.count
-      );
-      res.json(allPokemons);
-    }
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get("/count", async (req, res, next) => {
-  try {
-    const pokemonAPI = await axios.get(apiUrl);
-    res.json(await countPokemons(pokemonAPI.data.count));
-  } catch (err) {
-    console.log("hola");
-    next(err);
-  }
-});
-
-router.get("/pokemon/:id", async (req, res, next) => {
-  const pokemonAPI = await axios.get(apiUrl);
-  const count = pokemonAPI.data.count;
-  let { id } = req.params;
-  id = parseInt(id);
-  try {
-    if (id > count) {
-      const pokemon = await Pokemon.findOne({
-        where: {
-          id,
-        },
-        include: Type,
+      const dbPokemon = await Pokemon.findOne({
+        where: { name: name.toLocaleLowerCase() },
       });
-      if (pokemon) res.json(pokemon);
-      else res.sendStatus(404);
+      if (dbPokemon) res.json(dbPokemon);
+      else {
+        const pokemonName = await axios.get(
+          `${apiUrl}/pokemon/${name.toLowerCase()}`
+        );
+        res.json(await getDataPokemons(pokemonName.data));
+      }
     } else {
-      const pokemon = await axios.get(`${apiUrl}/${id}`);
-      if (getPkmData(pokemon.data)) res.json(getPkmData(pokemon.data));
-      else res.sendStatus(404);
+      const allPokemons = await axios.get(
+        `${apiUrl}/pokemon?offset=${offset}&limit=20`
+      );
+      res.json({
+        count: allPokemons.data.count,
+        pokemons: await getDataPokemons(allPokemons.data.results),
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/pokemonTypes", async (req, res, next) => {
+  const { nameOne, nameTwo, offset, limit, order } = req.query;
+  const allTypes = await axios.get(`${apiUrl}/type`);
+  try {
+    if (nameOne) {
+      const type = allTypes.data.results.find(
+        (typeName) => typeName.name === nameOne
+      );
+      const pokemonsType = await axios.get(type.url);
+      const flatPokemons = getPokemonsType(pokemonsType.data.pokemon);
+      const typePokemons = await getDataPokemons(flatPokemons);
+      let typePokemonsHelper = {};
+      if (nameTwo) {
+        const newTypePokemons = getTwoTypes(nameTwo, typePokemons);
+        typePokemonsHelper = newTypePokemons;
+      } else {
+        (typePokemonsHelper.count = flatPokemons.length),
+          (typePokemonsHelper.pokemons = typePokemons);
+      }
+      typePokemonsHelper.pokemons = orderPokemons(
+        order,
+        typePokemonsHelper.pokemons
+      );
+      if (offset) {
+        typePokemonsHelper.pokemons = typePokemonsHelper.pokemons.slice(
+          parseInt(offset),
+          parseInt(offset) + 20
+        );
+      }
+      res.json(typePokemonsHelper);
+    } else {
+      res.send("No hay nada mas");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/id/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const regexUUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  try {
+    if (regexUUID.test(id)) {
+      const pokemonDB = await Pokemon.findByPk(id);
+      if (pokemonDB) res.json(pokemonDB);
+    } else {
+      const pokemonApi = await axios.get(`${apiUrl}/pokemon/${id}`);
+      if (pokemonApi) res.json(await getDataPokemons(pokemonApi.data));
+      else res.json({ message: "That pokemon does not exists" });
     }
   } catch (err) {
     next(err);
+  }
+});
+
+router.get("/pokemonsDB", async (req, res, next) => {
+  const { order } = req.query;
+  try {
+    let pokemonsDB = await Pokemon.findAll({ include: Type });
+    pokemonsDB = orderPokemons(order, pokemonsDB);
+    res.json({ count: pokemonsDB.length, pokemons: pokemonsDB });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/types", async (req, res, next) => {
+  try {
+    const types = await Type.findAll();
+    res.json(types);
+  } catch (error) {
+    next(error);
   }
 });
 
 router.post("/", async (req, res, next) => {
   let { name, life, strength, defense, velocity, height, weight } = req.body;
   name = name.toLowerCase();
-  let pkmnExist = false;
   try {
-    const pokemon = await axios.get(`${apiUrl}/${name}`);
-    if (pokemon) pkmnExist = true;
-  } catch (err) {
-    pkmnExist = false;
-  }
-
-  try {
-    if (!pkmnExist) {
-      console.log(Pokemon);
-      const [newPokemon, created] = await Pokemon.findOrCreate({
-        where: { name },
-        defaults: {
-          name,
-          life,
-          strength,
-          defense,
-          velocity,
-          height,
-          weight,
-        },
-      });
-      if (created) {
-        res.send(newPokemon);
-      } else {
-        res.send("Pokemon already exists");
-      }
-    } else {
-      res.send("Pokemon alredy exists");
-    }
-  } catch (err) {
-    next(err); //if error exists go to the next middleware (Error catching endware)
-  }
-});
-
-router.post("/:pokemonId/type/:typeId", async (req, res, next) => {
-  try {
-    const { pokemonId, typeId } = req.params;
-    const pokemon = await Pokemon.findByPk(pokemonId);
-    await pokemon.addType(typeId);
-    res.json(pokemon);
+    const pokemon = await Pokemon.create({
+      name,
+      life,
+      strength,
+      defense,
+      velocity,
+      height,
+      weight,
+    });
+    res.send(pokemon);
   } catch (err) {
     next(err);
   }
-});
-
-router.put("/", (req, res, next) => {
-  res.send("I'm put from pokemons");
-});
-
-router.delete("/", (req, res, next) => {
-  res.send("I'm delete from pokemons");
 });
 
 module.exports = router;

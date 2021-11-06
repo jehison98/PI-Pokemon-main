@@ -20,13 +20,24 @@
 const server = require("./src/app.js");
 const { conn } = require("./src/db.js");
 
+async function getTypes() {
+  const { Type } = require("./src/db");
+  const { default: axios } = require("axios");
+  const apiTypes = await axios.get("https://pokeapi.co/api/v2/type");
+  apiTypes.data.results.forEach(async (type) => {
+    const name = type.name;
+    const theType = Type.build({
+      name: name, 
+    });
+    await theType.save();
+  });
+  console.log("types created");
+}
+
 // Syncing all the models at once.
 conn.sync({ force: true }).then(() => {
-  console.log("Connected to DB");
   server.listen(3001, () => {
     console.log("%s listening at 3001"); // eslint-disable-line no-console
-    const { saveApiTypes } = require("./src/saveApiTypes");
-    const { Type } = require("./src/db");
-    saveApiTypes(Type);
+    getTypes();
   });
 });

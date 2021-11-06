@@ -1,32 +1,34 @@
 const initialState = {
   pokemons: [],
-  pokemon: {},
-  error: false,
-  count: 0,
+  types: [],
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case "GET_TYPES":
+      return {
+        ...state,
+        types: action.payload,
+      };
     case "GET_POKEMONS":
       return {
         ...state,
         pokemons: action.payload,
       };
-    case "GET_COUNT":
+    case "GET_POKEMON_ID":
       return {
         ...state,
-        count: action.payload,
+        pokemons: action.payload,
       };
-    case "GET_BY_NAME":
+    case "GET_POKEMONS_DB":
       return {
         ...state,
-        pokemon: action.payload,
-        error: false,
+        pokemons: action.payload,
       };
-    case "404_POKEMON":
+    case "GET_POKEMONS_TYPES":
       return {
         ...state,
-        error: true,
+        pokemons: action.payload,
       };
     default:
       return { ...state };
