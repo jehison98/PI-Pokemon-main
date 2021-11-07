@@ -15,6 +15,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         pokemons: action.payload,
       };
+    case "GET_POKEMON_":
+      return {
+        ...state,
+        pokemons: action.payload,
+      };
     case "GET_POKEMON_ID":
       return {
         ...state,

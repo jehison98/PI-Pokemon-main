@@ -13,7 +13,7 @@ async function getDataPokemons(data) {
         velocity: pokemonData.data.stats[5].base_stat,
         height: pokemonData.data.height,
         weight: pokemonData.data.weight,
-        types: pokemonData.data.types,
+        types: getTypes(pokemonData.data.types),
         sprite: pokemonData.data.sprites.front_default,
       };
     });
@@ -28,9 +28,17 @@ async function getDataPokemons(data) {
     velocity: data.stats[5].base_stat,
     height: data.height,
     weight: data.weight,
-    types: data.types,
+    types: getTypes(data.types),
     sprite: data.sprites.front_default,
   };
+}
+
+function getTypes(types) {
+  let newTypes = [];
+  newTypes = types.map((type) => {
+    return { name: type.type.name };
+  });
+  return newTypes;
 }
 
 module.exports = { getDataPokemons };

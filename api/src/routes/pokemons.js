@@ -15,6 +15,7 @@ router.get("/", async (req, res, next) => {
   try {
     if (name) {
       const dbPokemon = await Pokemon.findOne({
+        include: Type,
         where: { name: name.toLocaleLowerCase() },
       });
       if (dbPokemon) res.json(dbPokemon);
@@ -82,7 +83,7 @@ router.get("/id/:id", async (req, res, next) => {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   try {
     if (regexUUID.test(id)) {
-      const pokemonDB = await Pokemon.findByPk(id);
+      const pokemonDB = await Pokemon.findOne({ include: Type, where: { id } });
       if (pokemonDB) res.json(pokemonDB);
     } else {
       const pokemonApi = await axios.get(`${apiUrl}/pokemon/${id}`);
@@ -116,20 +117,40 @@ router.get("/types", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   let { name, life, strength, defense, velocity, height, weight } = req.body;
-  name = name.toLowerCase();
   try {
-    const pokemon = await Pokemon.create({
-      name,
-      life,
-      strength,
-      defense,
-      velocity,
-      height,
-      weight,
-    });
-    res.send(pokemon);
+    name = name.toLowerCase();
+    try {
+      const pokemonApi = await axios.get(`${apiUrl}/pokemon/${name}`);
+      if (pokemonApi) res.json({ created: false });
+    } catch (error) {
+      const [pokemon, created] = await Pokemon.findOrCreate({
+        where: { name },
+        defaults: {
+          name,
+          life,
+          strength,
+          defense,
+          velocity,
+          height,
+          weight,
+        },
+      });
+      if (created) res.json(pokemon);
+      else res.json({ created: false });
+    }
   } catch (err) {
     next(err);
+  }
+});
+
+router.post("/:pokemonId/type/:typeId", async (req, res, next) => {
+  try {
+    const { pokemonId, typeId } = req.params;
+    const pokemon = await Pokemon.findByPk(pokemonId);
+    await pokemon.addType(typeId);
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
   }
 });
 

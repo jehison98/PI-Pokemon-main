@@ -61,15 +61,19 @@ function Search(props) {
           {pokemons && pokemons.hasOwnProperty("pokemons") ? (
             <>
               <Pokemons pokemons={pokemons} />
-              <Pagination
-                count={pokemons.count}
-                getPokemons={getPokemons}
-                getPokemonTypes={getPokemonTypes}
-                pagination={pagination}
-                setPagination={setPagination}
-                select={select}
-                checkbox={checkbox}
-              />
+              {pokemons.pokemons.length > 0 ? (
+                <Pagination
+                  count={pokemons.count}
+                  getPokemons={getPokemons}
+                  getPokemonTypes={getPokemonTypes}
+                  pagination={pagination}
+                  setPagination={setPagination}
+                  select={select}
+                  checkbox={checkbox}
+                />
+              ) : (
+                false
+              )}
             </>
           ) : (
             <Pokemon pokemon={pokemons} />
@@ -84,6 +88,7 @@ function mapStateToProps(state) {
   return {
     pokemons: state.pokemons,
     types: state.types,
+    error: state.error,
   };
 }
 

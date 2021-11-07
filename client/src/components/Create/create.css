@@ -1,0 +1,62 @@
+#create-pokemon {
+  margin: 1rem;
+  text-align: center;
+}
+
+.form-bg {
+  background-color: #fff;
+  color: #313131;
+}
+
+#create-form {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0rem 5rem;
+}
+
+#create-form label {
+  text-align: left;
+  margin: 1rem 0;
+  width: 50%;
+}
+
+#create-form label p {
+  margin: 0;
+  margin-bottom: 0.5rem;
+}
+
+#create-form input {
+  width: 50%;
+  padding: 0.5rem 1rem;
+}
+
+#create-pokemon .submit-btn {
+  text-align: center;
+}
+
+#create-pokemon .submit-btn button {
+  width: 15%;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
+#create-pokemon .select-options {
+  width: 30%;
+  margin: 0;
+}
+
+#create-pokemon .type-options {
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  flex-direction: column;
+  padding: 0rem 5rem;
+  width: 80%;
+}
+
+#create-pokemon .type-options h3 {
+  text-align: left;
+  font-weight: 500;
+}

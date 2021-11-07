@@ -4,7 +4,7 @@ function getTwoTypes(name, pokemonArray) {
     const pokemon = pokemonArray[i];
     for (let j = 0; j < pokemon.types.length; j++) {
       const type = pokemon.types[j];
-      if (type.type.name === name) {
+      if (type.name === name) {
         twoTypes.pokemons.push(pokemon);
         break;
       }

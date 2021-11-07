@@ -11,6 +11,19 @@ export function getPokemons(offset) {
   };
 }
 
+export function getPokemon(id) {
+  return function (dispatch) {
+    return fetch(`http://localhost:3001/api/pokemons/id/${id}`)
+      .then((response) => response.json())
+      .then((res) => {
+        dispatch({ type: "GET_POKEMON_", payload: res });
+      })
+      .catch((err) => {
+        dispatch({ type: "404_POKEMON", payload: err });
+      });
+  };
+}
+
 export function getPokemonId(name) {
   return function (dispatch) {
     return fetch(`http://localhost:3001/api/pokemons?name=${name}`)
@@ -19,7 +32,7 @@ export function getPokemonId(name) {
         dispatch({ type: "GET_POKEMON_ID", payload: res });
       })
       .catch((err) => {
-        dispatch({ type: "404_POKEMON", payload: err });
+        return alert("That pokemon does not exist");
       });
   };
 }
@@ -63,6 +76,48 @@ export function getDbPokemons(order) {
       })
       .catch((err) => {
         dispatch({ type: "404_POKEMON", payload: err });
+      });
+  };
+}
+
+export function postPokemon(body, typeId) {
+  return function (dispatch) {
+    return fetch(`http://localhost:3001/api/pokemons`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.created === false) {
+          return alert("That pokemon already exists");
+        } else {
+          fetch(
+            `http://localhost:3001/api/pokemons/${res.id}/type/${typeId[0]}`,
+            {
+              method: "POST",
+              body: JSON.stringify(body),
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+          if (
+            typeId.length > 1 &&
+            typeof typeId[1] === "number" &&
+            isNaN(typeId[1]) === false
+          ) {
+            fetch(
+              `http://localhost:3001/api/pokemons/${res.id}/type/${typeId[1]}`,
+              {
+                method: "POST",
+                body: JSON.stringify(body),
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
+        }
+      })
+      .catch((err) => {
+        dispatch({ type: "ERROR" });
       });
   };
 }

@@ -23,9 +23,7 @@ export function Pagination(props) {
     if (num < 0 || num > pagination.pages - 1) return false;
     if (pagination.filterState === 1 && checkbox[0]) {
       getPokemonTypes(checkbox, num * 20, select);
-      console.log("Entre a types");
     } else if (pagination.filterState === 0) {
-      console.log("entre al else");
       getPokemons(num * 20);
     }
     setPagination({ ...pagination, page: num });

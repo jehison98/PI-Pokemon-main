@@ -7,7 +7,7 @@ export function Options({ setSelect, select }) {
   }
 
   return (
-    <select id="select-options" value={select} onChange={selectFilter}>
+    <select className="select-options" value={select} onChange={selectFilter}>
       <option value="pokedex">Pokedex</option>
       <option value="nameAZ">Name: A - Z</option>
       <option value="nameZA">Name: Z - A</option>
