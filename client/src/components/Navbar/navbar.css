@@ -1,0 +1,38 @@
+#navbar {
+  width: 100%;
+  background-color: #006eb9;
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+  z-index: 99;
+}
+
+#navbar ul {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#navbar ul a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 7%;
+  height: 50px;
+  transition: background-color 0.5s ease;
+}
+
+#navbar ul a:hover {
+  background-color: #cbb925;
+}
+
+a {
+  font-size: 1.3rem;
+  text-decoration: none;
+  color: #fff;
+}
+
+.active {
+  background-color: #cbb925;
+}
