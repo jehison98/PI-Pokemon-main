@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { getPokemon } from "../../actions/index";
 import "./pokemon.css";
 
-function PokemonId(props) {
+export function PokemonId(props) {
   const { getPokemon, pokemon } = props;
   const id = props.match.params.id;
   useEffect(() => {
